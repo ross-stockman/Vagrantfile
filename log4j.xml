@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+        <appender name="FILE" class="org.apache.log4j.rolling.RollingFileAppender">
+                <param name="encoding" value="UTF-8" />
+                <param name="Append" value="true" />
+                <rollingPolicy class="org.apache.log4j.rolling.FixedWindowRollingPolicy">
+                        <param name="FileNamePattern" value="${user.home}/logs/application.log.%i.gz" />
+                        <param name="ActiveFileName" value="${user.home}/logs/application.log" />
+                        <param name="MaxIndex" value="10" />
+                </rollingPolicy>
+                <triggeringPolicy class="org.apache.log4j.rolling.SizeBasedTriggeringPolicy">
+                        <param name="MaxFileSize" value="50000000" />
+                </triggeringPolicy>
+                <layout class="org.apache.log4j.EnhancedPatternLayout">
+                        <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} %-5p [%t]: %c:%L - %m%n" />
+                </layout>
+        </appender>
+
+        <appender name="STDOUT" class="org.apache.log4j.ConsoleAppender">
+                <layout class="org.apache.log4j.PatternLayout">
+                        <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} %-5p [%t]: %c:%L - %m%n" />
+                </layout>
+        </appender>
+
+        <logger name="com.optum.fbi" additivity="false">
+                <level value="DEBUG" />
+                <appender-ref ref="FILE" />
+                <appender-ref ref="STDOUT" />
+        </logger>
+
+        <root>
+                <level value="WARN" />
+                <appender-ref ref="FILE" />
+                <appender-ref ref="STDOUT" />
+        </root>
+
+</log4j:configuration>
