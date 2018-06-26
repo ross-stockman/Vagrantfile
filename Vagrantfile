@@ -1,9 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-#BOX_IMAGE = "ubuntu/xenial64"
-BOX_IMAGE = "centos/7"
-BOX_URL = "http://cloud.centos.org/centos/7/vagrant/x86_64/images/CentOS-7.box"
+BOX_IMAGE = "ubuntu/xenial64"
 
 Vagrant.configure("2") do |config|
 
@@ -26,7 +24,6 @@ Vagrant.configure("2") do |config|
 		config.vm.define node[:name] do |subconfig|
 			subconfig.vm.hostname = node[:name]
 			subconfig.vm.box = BOX_IMAGE
-			subconfig.vm.box_url = BOX_URL
 			subconfig.vm.network "private_network", ip: node[:ip]
 			subconfig.vm.provider "virtualbox" do |virtualbox|
 				virtualbox.name = node[:name]
@@ -37,7 +34,7 @@ Vagrant.configure("2") do |config|
 	end
 
 	config.vm.provision "shell", inline: bootstrap_script
-	
+
 	config.vm.provision "file", source: "~/.gitconfig", destination: "/home/vagrant/.gitconfig"
 
 	config.vm.synced_folder '.', '/vagrant'

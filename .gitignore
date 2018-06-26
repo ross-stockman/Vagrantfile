@@ -399,3 +399,4 @@ activemq-data/
 .vagrant/
 downloads/
 secrets/
+metastore_db/
