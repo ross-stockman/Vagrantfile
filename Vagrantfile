@@ -6,9 +6,12 @@ BOX_IMAGE = "ubuntu/xenial64"
 Vagrant.configure("2") do |config|
 
 	bootstrap_script = <<-SHELL
-#		sudo apt-get update
-#		sudo apt-get upgrade -y
-#		sudo apt-get install vim unzip curl wget libxml2-utils default-jdk scala ant maven gradle git build-essential zsh htop -y
+		sudo apt-get update
+		sudo apt-get upgrade -y
+		sudo apt-get install vim unzip curl wget libxml2-utils default-jdk scala ant maven gradle git build-essential zsh htop -y
+		echo 'export JAVA_HOME=/usr/lib/jvm/default-java' | sudo tee -a /etc/profile
+		echo 'export PATH=$PATH:$JAVA_HOME/bin' | sudo tee -a /etc/profile
+		source /etc/profile
 		echo "
 			192.168.0.13 vagrant
 		" | sudo tee -a /etc/hosts

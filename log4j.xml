@@ -24,7 +24,7 @@
                 </layout>
         </appender>
 
-        <logger name="com.optum.fbi" additivity="false">
+        <logger name="rws" additivity="false">
                 <level value="DEBUG" />
                 <appender-ref ref="FILE" />
                 <appender-ref ref="STDOUT" />
