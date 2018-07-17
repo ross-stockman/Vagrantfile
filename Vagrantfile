@@ -9,7 +9,7 @@ Vagrant.configure("2") do |config|
 	bootstrap_script = <<-SHELL
 		sudo apt-get update
 		sudo apt-get upgrade -y
-		sudo apt-get install vim unzip curl wget libxml2-utils default-jdk scala ant maven gradle git build-essential zsh htop -y
+		sudo apt-get install vim unzip curl wget libxml2-utils default-jdk scala ant maven gradle git build-essential zsh htop debconf-utils -y
 		sudo apt-get install vim default-jdk
 		echo 'export JAVA_HOME=/usr/lib/jvm/default-java' | sudo tee -a /etc/profile
 		echo 'export PATH=$PATH:$JAVA_HOME/bin' | sudo tee -a /etc/profile
@@ -30,6 +30,7 @@ Vagrant.configure("2") do |config|
 			subconfig.vm.hostname = host[:name]
 			subconfig.vm.box = BOX_IMAGE
 			subconfig.vm.network "private_network", ip: host[:ip]
+			#subconfig.vm.network "forwarded_port", guest: 80, host: 8080
 			subconfig.vm.provider "virtualbox" do |virtualbox|
 				virtualbox.name = host[:name]
 				virtualbox.memory = 4092
@@ -47,5 +48,6 @@ Vagrant.configure("2") do |config|
 	config.vm.provision "file", source: "~/.gitconfig", destination: "/home/vagrant/.gitconfig"
 
 	config.vm.synced_folder '.', '/vagrant'
+	#config.vm.synced_folder '.', '/vagrant', :mount_options => ["dmode=777","fmode=666"]
 
 end
