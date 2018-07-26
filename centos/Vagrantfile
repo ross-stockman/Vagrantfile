@@ -1,0 +1,79 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+BOX_IMAGE = "centos/7"
+
+Vagrant.configure("2") do |config|
+
+	bootstrap_script = <<-SHELL
+		yum -y update
+		yum -y upgrade
+		yum -y install git
+		yum -y install unzip
+		yum -y install vim
+		yum -y install curl
+		yum -y install which
+		yum -y install wget
+		yum -y install java-1.8.0-openjdk
+		yum -y install maven
+
+		## install scala and sbt http://www.mcclellandlegge.com/2017-02-23-installscala/ https://www.scala-sbt.org/1.0/docs/Installing-sbt-on-Linux.html
+		yum -y install https://downloads.lightbend.com/scala/2.11.8/scala-2.11.8.rpm
+		curl https://bintray.com/sbt/rpm/rpm | tee /etc/yum.repos.d/bintray-sbt-rpm.repo
+		yum -y install sbt
+
+		## install docker https://docs.docker.com/install/linux/docker-ce/centos/#install-using-the-repository
+		yum -y install yum-utils device-mapper-persistent-data lvm2
+		yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+		yum -y install docker-ce
+
+		## install confluent https://docs.confluent.io/current/installation/installing_cp/rhel-centos.html
+		mv /tmp/confluent.repo /etc/yum.repos.d/
+		rpm --import https://packages.confluent.io/rpm/4.1/archive.key
+		yum clean all && yum -y install confluent-platform-oss-2.11
+
+		## install spark https://spark.apache.org/downloads.html
+		wget http://mirror.reverse.net/pub/apache/spark/spark-2.3.1/spark-2.3.1-bin-hadoop2.7.tgz
+		tar -xzvf spark-2.3.1-bin-hadoop2.7.tgz
+		mv spark-2.3.1-bin-hadoop2.7 spark
+		mv spark /usr/lib/
+		rm spark-2.3.1-bin-hadoop2.7.tgz
+		echo 'export SPARK_HOME=/usr/lib/spark' | tee -a /etc/profile
+		echo 'export PATH=$PATH:$SPARK_HOME/bin' | tee -a /etc/profile
+		source /etc/profile
+
+	SHELL
+
+	## to create a cluster, add more hosts to this array. just mind your memory and cpus config below
+	hosts = [
+		{ name: "sandbox", ip: "192.168.0.10" }
+	]
+
+	hosts.each do |host|
+		config.vm.define host[:name] do |subconfig|
+			subconfig.vm.hostname = host[:name]
+			subconfig.vm.box = BOX_IMAGE
+			subconfig.vm.network "private_network", ip: host[:ip]
+			#subconfig.vm.network "public_network"
+			#subconfig.vm.network "forwarded_port", guest: 80, host: 8080
+			subconfig.vm.provider "virtualbox" do |virtualbox|
+				virtualbox.name = host[:name]
+				virtualbox.memory = 4092
+				virtualbox.cpus = 2
+			end
+		end
+	end
+
+	config.vm.synced_folder '../', '/vagrant'
+
+	## privileged provision scripts (sudo/root user)
+	config.vm.provision "file", source: "confluent.repo", destination: "/tmp/confluent.repo"
+	config.vm.provision "shell", inline: bootstrap_script
+	hosts.each do |host|
+		config.vm.provision "shell", inline: "echo " + host[:ip] + " " + host[:name] + " | tee -a /etc/hosts"
+	end
+
+	## non-privileged provision scripts (vagrant user)
+	config.vm.provision "file", source: "~/.gitconfig", destination: "/home/vagrant/.gitconfig"
+
+end
